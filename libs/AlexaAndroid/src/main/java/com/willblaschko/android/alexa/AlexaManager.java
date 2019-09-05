@@ -1,9 +1,18 @@
 package com.willblaschko.android.alexa;
 
+/**
+ * Created by Maxime on 05/09/2019.
+ * Re-add file deleted on 27/05/2019
+ */
+
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.callbacks.AuthorizationCallback;
@@ -23,9 +32,6 @@ import com.willblaschko.android.alexa.service.DownChannelService;
 import com.willblaschko.android.alexa.system.AndroidSystemHandler;
 import com.willblaschko.android.alexa.utility.Util;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
@@ -43,6 +49,7 @@ import static com.willblaschko.android.alexa.utility.Util.IDENTIFIER;
  *
  * Beyond initialization, mostly it supplies wrapped helper functions to the other classes to assure authentication state.
  */
+@SuppressLint("StaticFieldLeak")
 public class AlexaManager {
 
 
@@ -153,7 +160,7 @@ public class AlexaManager {
      * Check if the user is logged in to the Amazon service, uses an async callback with a boolean to return response
      * @param callback state callback
      */
-    public void checkLoggedIn(@NotNull final AsyncCallback<Boolean, Throwable> callback){
+    public void checkLoggedIn(@NonNull final AsyncCallback<Boolean, Throwable> callback){
         mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
             @Override
             public void start() {
@@ -618,7 +625,7 @@ public class AlexaManager {
                 if (callback != null) {
                     callback.success(items);
                 }
-            } catch (IOException|AvsException e) {
+            } catch (IOException| AvsException e) {
                 if (!currentCall.isCanceled()) {
                     if (callback != null) {
                         callback.failure(e);

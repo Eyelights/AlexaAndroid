@@ -48,7 +48,7 @@ import java.util.regex.Pattern;
 import okhttp3.Headers;
 import okhttp3.Response;
 
-import static okhttp3.internal.Util.UTF_8;
+import static kotlin.text.Charsets.UTF_8;
 
 /**
  * Static helper class to parse incoming responses from the Alexa server and generate a corresponding

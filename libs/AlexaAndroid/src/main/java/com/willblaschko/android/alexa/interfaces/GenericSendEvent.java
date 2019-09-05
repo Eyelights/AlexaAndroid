@@ -2,9 +2,9 @@ package com.willblaschko.android.alexa.interfaces;
 
 import android.util.Log;
 
-import com.willblaschko.android.alexa.callbacks.AsyncCallback;
+import androidx.annotation.NonNull;
 
-import org.jetbrains.annotations.NotNull;
+import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 
 import java.io.IOException;
 
@@ -41,7 +41,7 @@ public class GenericSendEvent extends SendEvent{
 
     }
 
-    @NotNull
+    @NonNull
     @Override
     public String getEvent() {
         return event;

@@ -6,14 +6,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.amazon.identity.auth.device.AuthError;
 import com.amazon.identity.auth.device.authorization.api.AmazonAuthorizationManager;
 import com.google.gson.Gson;
 import com.willblaschko.android.alexa.connection.ClientUtil;
 import com.willblaschko.android.alexa.utility.Util;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 
@@ -56,7 +56,7 @@ public class TokenManager {
      * @param authorizationManager the AuthorizationManager class calling this function
      * @param callback the callback for state changes
      */
-    public static void getAccessToken(final Context context, @NotNull String authCode, @NotNull String codeVerifier, AmazonAuthorizationManager authorizationManager, @Nullable final TokenResponseCallback callback){
+    public static void getAccessToken(final Context context, @NonNull String authCode, @NonNull String codeVerifier, AmazonAuthorizationManager authorizationManager, @Nullable final TokenResponseCallback callback){
         //this url shouldn't be hardcoded, but it is, it's the Amazon auth access token endpoint
         String url = "https://api.amazon.com/auth/O2/token";
 
@@ -128,7 +128,7 @@ public class TokenManager {
      * @param context local/application context
      * @param callback the TokenCallback where we return our tokens when successful
      */
-    public static void getAccessToken(@NotNull AmazonAuthorizationManager authorizationManager, @NotNull Context context, @NotNull TokenCallback callback) {
+    public static void getAccessToken(@NonNull AmazonAuthorizationManager authorizationManager, @NonNull Context context, @NonNull TokenCallback callback) {
         SharedPreferences preferences = Util.getPreferences(context.getApplicationContext());
         //if we have an access token
         if(preferences.contains(PREF_ACCESS_TOKEN)){
@@ -157,7 +157,7 @@ public class TokenManager {
      * @param callback
      * @param refreshToken the refresh token we have stored in local cache (sharedPreferences)
      */
-    private static void getRefreshToken(@NotNull AmazonAuthorizationManager authorizationManager, @NotNull final Context context, @NotNull final TokenCallback callback, String refreshToken){
+    private static void getRefreshToken(@NonNull AmazonAuthorizationManager authorizationManager, @NonNull final Context context, @NonNull final TokenCallback callback, String refreshToken){
         //this url shouldn't be hardcoded, but it is, it's the Amazon auth access token endpoint
         String url = "https://api.amazon.com/auth/O2/token";
 

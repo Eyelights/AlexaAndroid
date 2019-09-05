@@ -2,11 +2,11 @@ package com.willblaschko.android.alexa.interfaces.speechrecognizer;
 
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.interfaces.AvsException;
 import com.willblaschko.android.alexa.requestbody.DataRequestBody;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -35,7 +35,7 @@ public class SpeechSendAudio extends SpeechSendEvent {
      * @param callback our event callbacks
      * @throws IOException
      */
-    public void sendAudio(final String url, final String accessToken, @NotNull DataRequestBody requestBody,
+    public void sendAudio(final String url, final String accessToken, @NonNull DataRequestBody requestBody,
                           final AsyncCallback<Call, Exception> callback) throws IOException {
         this.requestBody = requestBody;
         if(callback != null){
@@ -74,7 +74,7 @@ public class SpeechSendAudio extends SpeechSendEvent {
         }
     }
 
-    @NotNull
+    @NonNull
     @Override
     protected RequestBody getRequestBody() {
         return requestBody;

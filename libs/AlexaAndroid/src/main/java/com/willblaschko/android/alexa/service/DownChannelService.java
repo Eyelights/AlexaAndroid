@@ -5,8 +5,9 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import com.willblaschko.android.alexa.AlexaManager;
 import com.willblaschko.android.alexa.TokenManager;

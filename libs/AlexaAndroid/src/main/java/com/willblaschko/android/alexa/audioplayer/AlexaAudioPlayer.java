@@ -9,12 +9,12 @@ import android.os.PowerManager;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.Nullable;
+
 import com.willblaschko.android.alexa.interfaces.AvsItem;
 import com.willblaschko.android.alexa.interfaces.audioplayer.AvsPlayContentItem;
 import com.willblaschko.android.alexa.interfaces.audioplayer.AvsPlayRemoteItem;
 import com.willblaschko.android.alexa.interfaces.speechsynthesizer.AvsSpeakItem;
-
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -245,7 +245,7 @@ public class AlexaAudioPlayer {
      * @return true playing, false not
      */
     public boolean isPlaying(){
-        return getMediaPlayer().isPlaying();
+        return getMediaPlayer().isPlaying() || ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE)).isMusicActive();
     }
 
     /**

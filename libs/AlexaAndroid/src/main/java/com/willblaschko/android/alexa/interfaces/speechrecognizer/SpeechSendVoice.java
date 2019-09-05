@@ -6,12 +6,12 @@ import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.interfaces.AvsException;
 import com.willblaschko.android.alexa.requestbody.DataRequestBody;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -166,7 +166,7 @@ public class SpeechSendVoice extends SpeechSendEvent {
     }
 
 
-    @NotNull
+    @NonNull
     @Override
     protected RequestBody getRequestBody() {
         return new DataRequestBody() {

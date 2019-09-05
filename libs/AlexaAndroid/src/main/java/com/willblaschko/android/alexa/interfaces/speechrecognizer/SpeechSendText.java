@@ -4,12 +4,12 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.willblaschko.android.alexa.VoiceHelper;
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.interfaces.AvsException;
 import com.willblaschko.android.alexa.requestbody.DataRequestBody;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
@@ -95,7 +95,7 @@ public class SpeechSendText extends SpeechSendEvent {
     }
 
 
-    @NotNull
+    @NonNull
     @Override
     protected RequestBody getRequestBody() {
         return new DataRequestBody() {

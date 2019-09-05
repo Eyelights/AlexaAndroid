@@ -6,6 +6,8 @@ import android.provider.Settings;
 import android.util.Base64;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.amazon.identity.auth.device.AuthError;
 import com.amazon.identity.auth.device.authorization.BuildConfig;
 import com.amazon.identity.auth.device.authorization.api.AmazonAuthorizationManager;
@@ -14,8 +16,6 @@ import com.amazon.identity.auth.device.authorization.api.AuthzConstants;
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.callbacks.AuthorizationCallback;
 import com.willblaschko.android.alexa.utility.Util;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -48,7 +48,7 @@ public class AuthorizationManager {
      * @param context
      * @param productId
      */
-    public AuthorizationManager(@NotNull Context context, @NotNull String productId){
+    public AuthorizationManager(@NonNull Context context, @NonNull String productId){
         mContext = context;
         mProductId = productId;
 

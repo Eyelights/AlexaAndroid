@@ -1,9 +1,9 @@
 package com.willblaschko.android.alexa.interfaces;
 
+import androidx.annotation.NonNull;
+
 import com.willblaschko.android.alexa.callbacks.AsyncCallback;
 import com.willblaschko.android.alexa.connection.ClientUtil;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -105,7 +105,7 @@ public abstract class SendEvent {
      * Get our JSON {@link com.willblaschko.android.alexa.data.Event} for this call
      * @return the JSON representation of the {@link com.willblaschko.android.alexa.data.Event}
      */
-    @NotNull
+    @NonNull
     protected abstract String getEvent();
 
 }

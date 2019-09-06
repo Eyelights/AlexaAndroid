@@ -35,6 +35,9 @@ import com.willblaschko.android.alexa.utility.Util;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import okhttp3.Call;
 import okhttp3.Response;
 import okio.BufferedSink;
@@ -181,6 +184,31 @@ public class AlexaManager {
 
             }
         });
+    }
+
+    /**
+     * Check if the user is logged into The Amazon service
+     * @return [Single<Boolean>] : true if the user is logged; false otherwise
+     */
+    public Single<Boolean> checkLoggedIn() {
+       return Single.create(new SingleOnSubscribe<Boolean>() {
+           @Override
+           public void subscribe(final SingleEmitter<Boolean> emitter) {
+               mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
+                   @Override
+                   public void start() {}
+
+                   @Override
+                   public void success(Boolean result) { emitter.onSuccess(result); }
+
+                   @Override
+                   public void failure(Throwable error) { emitter.onError(error); }
+
+                   @Override
+                   public void complete() {}
+               });
+           }
+       });
     }
 
     /**

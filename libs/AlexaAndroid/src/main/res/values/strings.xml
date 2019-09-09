@@ -3,4 +3,5 @@
     <string name="alexa_product_id">eyelights_mobile_apps</string>
     <string name="alexa_api">https://avs-alexa-na.amazon.com</string>
     <string name="alexa_api_version">v20160207</string>
+    <string name="alexa_auth_url">https://api.amazon.com/auth/O2/token</string>
 </resources>

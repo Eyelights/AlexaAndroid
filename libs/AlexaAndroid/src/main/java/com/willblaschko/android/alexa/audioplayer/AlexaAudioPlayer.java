@@ -36,6 +36,7 @@ public class AlexaAudioPlayer {
     private Context mContext;
     private AvsItem mItem;
     private final List<Callback> mCallbacks = new ArrayList<>();
+    private Boolean alexaIsSpeacking = false;
 
     /**
      * Create our new AlexaAudioPlayer
@@ -244,6 +245,7 @@ public class AlexaAudioPlayer {
         //prepare our player, this will start once prepared because of mPreparedListener
         try {
             getMediaPlayer().prepareAsync();
+            alexaIsSpeacking = true;
         } catch (IllegalStateException e) {
             bubbleUpError(e);
         }
@@ -255,7 +257,7 @@ public class AlexaAudioPlayer {
      * @return true playing, false not
      */
     public boolean isPlaying() {
-        return getMediaPlayer().isPlaying() /*|| ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE)).isMusicActive()*/;
+        return getMediaPlayer().isPlaying();
     }
 
     /**
@@ -351,6 +353,7 @@ public class AlexaAudioPlayer {
     private MediaPlayer.OnCompletionListener mCompletionListener = new MediaPlayer.OnCompletionListener() {
         @Override
         public void onCompletion(MediaPlayer mp) {
+            alexaIsSpeacking = false;
             for (Callback callback : mCallbacks) {
                 callback.playerProgress(mItem, 1, 1);
                 callback.itemComplete(mItem);
@@ -400,6 +403,7 @@ public class AlexaAudioPlayer {
         public boolean onError(MediaPlayer mp, int what, int extra) {
             for (Callback callback : mCallbacks) {
                 boolean response = callback.playerError(mItem, what, extra);
+                alexaIsSpeacking = false;
                 if (response) {
                     return response;
                 }
@@ -408,5 +412,12 @@ public class AlexaAudioPlayer {
         }
     };
 
-
+    /**
+     * Check if Alexa is currently speacking
+     *
+     * @return {Boolean} : true if Alexa is currently speacking; false otherwise
+     */
+    public Boolean isAlexaSpeacking() {
+        return alexaIsSpeacking;
+    }
 }

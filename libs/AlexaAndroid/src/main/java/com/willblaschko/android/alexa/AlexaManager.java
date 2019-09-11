@@ -102,7 +102,6 @@ public class AlexaManager {
 
     /**
      * Return an instance of AlexaManager
-     * <p>
      * Deprecated: use @getInstance(Context) instead and set R.string.alexa_product_id in your application resources,
      * this change was made to properly support the DownChannelService
      *
@@ -167,9 +166,7 @@ public class AlexaManager {
     public void checkLoggedIn(@NonNull final AsyncCallback<Boolean, Throwable> callback) {
         mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
             @Override
-            public void start() {
-
-            }
+            public void start() { }
 
             @Override
             public void success(Boolean result) {
@@ -199,9 +196,7 @@ public class AlexaManager {
             public void subscribe(final SingleEmitter<Boolean> emitter) {
                 mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
                     @Override
-                    public void start() {
-                        Log.d(TAG, "check login");
-                    }
+                    public void start() { }
 
                     @Override
                     public void success(Boolean result) {
@@ -214,8 +209,7 @@ public class AlexaManager {
                     }
 
                     @Override
-                    public void complete() {
-                    }
+                    public void complete() { }
                 });
             }
         });
@@ -230,9 +224,7 @@ public class AlexaManager {
         //check if we're already logged in
         mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
             @Override
-            public void start() {
-                Log.d(TAG, "login");
-            }
+            public void start() { }
 
             @Override
             public void success(Boolean result) {
@@ -276,7 +268,6 @@ public class AlexaManager {
 
     /**
      * Send a text string request to the AVS server, this is run through Text-To-Speech to create the raw audio file needed by the AVS server.
-     * <p>
      * This allows the developer to pre/post-pend or send any arbitrary text to the server, versus the startRecording()/stopRecording() combination which
      * expects input from the user. This operation, because of the extra steps is generally slower than the above option.
      *
@@ -384,7 +375,6 @@ public class AlexaManager {
                             //do this off the main thread
                             try {
                                 Runnable runnable = new Runnable() {
-
                                     @Override
                                     public void run() {
                                         try {

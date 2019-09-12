@@ -144,10 +144,9 @@ public class TokenManager {
                     return;
                 }
             }
+        } else {
+            callback.onFailure(new IllegalStateException("User is not logged in and no refresh token found."));
         }
-
-        //uh oh, the user isn't logged in, we have an IllegalStateException going on!
-        callback.onFailure(new IllegalStateException("User is not logged in and no refresh token found."));
     }
 
     /**
@@ -158,9 +157,7 @@ public class TokenManager {
      * @param refreshToken the refresh token we have stored in local cache (sharedPreferences)
      */
     private static void getRefreshToken(@NonNull AmazonAuthorizationManager authorizationManager, @NonNull final Context context, @NonNull final TokenCallback callback, String refreshToken){
-        //this url shouldn't be hardcoded, but it is, it's the Amazon auth access token endpoint
-        String url = "https://api.amazon.com/auth/O2/token";
-
+        String url = context.getString(R.string.alexa_auth_url);
 
         //set up our arguments for the api call, these will be the call headers
         FormBody.Builder builder = new FormBody.Builder()

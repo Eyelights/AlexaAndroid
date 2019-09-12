@@ -77,7 +77,6 @@ public class AuthorizationManager {
             @Override
             public void onFailure(Throwable e) {
                 callback.success(false);
-                callback.failure(e);
             }
         });
     }

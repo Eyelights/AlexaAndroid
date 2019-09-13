@@ -32,5 +32,6 @@ android {
     buildTypes{
         debug{  }
         release{  }
+        alexa { }
     }
 }

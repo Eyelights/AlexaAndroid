@@ -58,7 +58,7 @@ public class AlexaManager {
 
     private static AlexaManager mInstance;
     private static AndroidSystemHandler mAndroidSystemHandler;
-    private ReAuthorizationManager authorizationManager;
+    private AuthorizationManagerImpl authorizationManager;
     private SpeechSendVoice mSpeechSendVoice;
     private SpeechSendText mSpeechSendText;
     private SpeechSendAudio mSpeechSendAudio;
@@ -73,7 +73,7 @@ public class AlexaManager {
         }
         urlEndpoint = Util.getPreferences(context).getString(KEY_URL_ENDPOINT, context.getString(R.string.alexa_api));
 
-        authorizationManager = new ReAuthorizationManager(mContext, productId);
+        authorizationManager = new AuthorizationManagerImpl(mContext, productId);
         mAndroidSystemHandler = AndroidSystemHandler.getInstance(context);
         Intent stickyIntent = new Intent(context, DownChannelService.class);
         context.startService(stickyIntent);
@@ -106,7 +106,7 @@ public class AlexaManager {
         return mInstance;
     }
 
-    public ReAuthorizationManager getAuthorizationManager() {
+    public AuthorizationManagerImpl getAuthorizationManager() {
         return authorizationManager;
     }
 
@@ -489,7 +489,7 @@ public class AlexaManager {
                     Thread thread = new Thread(runnable);
                     thread.start();
 
-                } else { //User not connected
+                } /*else { //User not connected
                     logIn(new ImplAuthorizationCallback<AvsResponse>(callback) {
                         @Override
                         public void onSuccess() {
@@ -497,7 +497,7 @@ public class AlexaManager {
                             sendEvent(event, callback);
                         }
                     });
-                }
+                }*/
             }
 
             @Override

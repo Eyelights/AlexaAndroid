@@ -9,6 +9,12 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.amazon.identity.auth.device.AuthError;
+import com.amazon.identity.auth.device.api.Listener;
+import com.amazon.identity.auth.device.api.authorization.AuthorizationManager;
+import com.amazon.identity.auth.device.api.authorization.AuthorizeResult;
+import com.amazon.identity.auth.device.api.authorization.ProfileScope;
+import com.amazon.identity.auth.device.api.authorization.Scope;
 import com.willblaschko.android.alexa.AlexaManager;
 import com.willblaschko.android.alexa.TokenManager;
 import com.willblaschko.android.alexa.callbacks.ImplAsyncCallback;
@@ -43,6 +49,7 @@ public class DownChannelService extends Service {
     private AndroidSystemHandler handler;
     private Handler runnableHandler;
     private Runnable pingRunnable;
+    private Scope[] scopes;
 
     @Nullable
     @Override
@@ -57,20 +64,21 @@ public class DownChannelService extends Service {
         Log.i(TAG, "Launched");
         alexaManager = AlexaManager.getInstance(this);
         handler = AndroidSystemHandler.getInstance(this);
+        scopes = new Scope[]{ProfileScope.profile(), ProfileScope.postalCode()};
 
         runnableHandler = new Handler(Looper.getMainLooper());
         pingRunnable = new Runnable() {
             @Override
             public void run() {
-                TokenManager.getAccessToken(alexaManager.getAuthorizationManager().getAmazonAuthorizationManager(), DownChannelService.this, new TokenManager.TokenCallback() {
-                    @Override
-                    public void onSuccess(String token) {
+                AuthorizationManager.getToken(DownChannelService.this, scopes, new Listener<AuthorizeResult, AuthError>() {
 
+                    @Override
+                    public void onSuccess(AuthorizeResult authorizeResult) {
                         Log.i(TAG, "Sending heartbeat");
                         final Request request = new Request.Builder()
                                 .url(alexaManager.getPingUrl())
                                 .get()
-                                .addHeader("Authorization", "Bearer " + token)
+                                .addHeader("Authorization", "Bearer " + authorizeResult.getAccessToken())
                                 .build();
 
                         ClientUtil.getTLS12OkHttpClient()
@@ -89,7 +97,7 @@ public class DownChannelService extends Service {
                     }
 
                     @Override
-                    public void onFailure(Throwable e) {
+                    public void onError(AuthError authError) {
 
                     }
                 });
@@ -112,16 +120,17 @@ public class DownChannelService extends Service {
 
 
     private void openDownChannel(){
-        TokenManager.getAccessToken(alexaManager.getAuthorizationManager().getAmazonAuthorizationManager(), DownChannelService.this, new TokenManager.TokenCallback() {
+
+        AuthorizationManager.getToken(DownChannelService.this, scopes, new Listener<AuthorizeResult, AuthError>() {
             @Override
-            public void onSuccess(String token) {
+            public void onSuccess(AuthorizeResult authorizeResult) {
 
                 OkHttpClient downChannelClient = ClientUtil.getTLS12OkHttpClient();
 
                 final Request request = new Request.Builder()
                         .url(alexaManager.getDirectivesUrl())
                         .get()
-                        .addHeader("Authorization", "Bearer " + token)
+                        .addHeader("Authorization", "Bearer " + authorizeResult.getAccessToken())
                         .build();
 
                 currentCall = downChannelClient.newCall(request);
@@ -164,12 +173,11 @@ public class DownChannelService extends Service {
 
                     }
                 });
-
             }
 
             @Override
-            public void onFailure(Throwable e) {
-                e.printStackTrace();
+            public void onError(AuthError authError) {
+                authError.printStackTrace();
             }
         });
     }

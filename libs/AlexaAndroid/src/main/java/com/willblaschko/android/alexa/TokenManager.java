@@ -53,7 +53,7 @@ public class TokenManager {
      * @param context local/application level context
      * @param authCode the authorization code supplied by the Authorization Manager
      * @param codeVerifier a randomly generated verifier, must be the same every time
-     * @param authorizationManager the AuthorizationManager class calling this function
+     * @param authorizationManager the AmazonAuthorizationManager class calling this function
      * @param callback the callback for state changes
      */
     public static void getAccessToken(final Context context, @NonNull String authCode, @NonNull String codeVerifier, AmazonAuthorizationManager authorizationManager, @Nullable final TokenResponseCallback callback){
@@ -227,6 +227,20 @@ public class TokenManager {
         //comes back in seconds, needs to be milis
         preferences.putLong(PREF_TOKEN_EXPIRES, (System.currentTimeMillis() + tokenResponse.expires_in * 1000));
         preferences.commit();
+    }
+
+    /**
+     * Remove every traces of the current connection to make the application believe the user is disconnected
+     * /!\ Alexa services believe you are still connected !
+     * @param context {Context} : local/application context
+     */
+    public static void removeTokens(Context context) {
+        SharedPreferences.Editor preferences = Util.getPreferences(context.getApplicationContext()).edit();
+        preferences.remove(PREF_ACCESS_TOKEN);
+        preferences.remove(PREF_REFRESH_TOKEN);
+        preferences.remove(PREF_TOKEN_EXPIRES);
+        preferences.remove(AuthorizationManager.CODE_VERIFIER);
+        preferences.apply();
     }
 
     public interface TokenResponseCallback {

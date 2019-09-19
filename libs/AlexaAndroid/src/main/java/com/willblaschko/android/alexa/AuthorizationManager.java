@@ -38,7 +38,7 @@ public class AuthorizationManager {
     private AuthorizationCallback mCallback;
 
 
-    private static final String CODE_VERIFIER = "code_verifier";
+    public static final String CODE_VERIFIER = "code_verifier";
 
     /**
      * Create a new Auth Manager based on the supplied product id

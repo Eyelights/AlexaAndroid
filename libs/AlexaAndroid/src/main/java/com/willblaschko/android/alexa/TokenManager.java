@@ -150,6 +150,16 @@ public class TokenManager {
     }
 
     /**
+     * Check if the user is logged, regardless the status of his token
+     * @param context
+     * @return
+     */
+    public static Boolean doesTokenExists(@NonNull Context context) {
+        SharedPreferences preferences = Util.getPreferences(context.getApplicationContext());
+        return preferences.contains(PREF_ACCESS_TOKEN);
+    }
+
+    /**
      * Get a new refresh token from the Amazon server to replace the expired access token that we currently have
      * @param authorizationManager
      * @param context

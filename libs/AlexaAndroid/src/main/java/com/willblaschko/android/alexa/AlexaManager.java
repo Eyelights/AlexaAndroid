@@ -216,6 +216,14 @@ public class AlexaManager {
     }
 
     /**
+     *
+     * @return
+     */
+    public Boolean isLoggedIn() {
+        return mAuthorizationManager.isLoggedIn();
+    }
+
+    /**
      * Send a log in request to the Amazon Authentication Manager
      *
      * @param callback state callback

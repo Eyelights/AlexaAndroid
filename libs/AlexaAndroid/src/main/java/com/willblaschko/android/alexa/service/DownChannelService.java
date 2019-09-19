@@ -143,13 +143,15 @@ public class DownChannelService extends Service {
                     @Override
                     public void onResponse(Call call, Response response) throws IOException {
 
-                        alexaManager.sendEvent(Event.getSynchronizeStateEvent(), new ImplAsyncCallback<AvsResponse, Exception>() {
-                            @Override
-                            public void success(AvsResponse result) {
-                                handler.handleItems(result);
-                                runnableHandler.post(pingRunnable);
-                            }
-                        });
+                        if (TokenManager.doesTokenExists(DownChannelService.this)) {
+                            alexaManager.sendEvent(Event.getSynchronizeStateEvent(), new ImplAsyncCallback<AvsResponse, Exception>() {
+                                @Override
+                                public void success(AvsResponse result) {
+                                    handler.handleItems(result);
+                                    runnableHandler.post(pingRunnable);
+                                }
+                            });
+                        }
 
                         BufferedSource bufferedSource = response.body().source();
 

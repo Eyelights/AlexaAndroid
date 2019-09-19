@@ -82,6 +82,14 @@ public class AuthorizationManager {
     }
 
     /**
+     *
+     * @return
+     */
+    public Boolean isLoggedIn() {
+        return TokenManager.doesTokenExists(mContext);
+    }
+
+    /**
      * Request authorization for the user to be able to use the application, this opens an intent that feeds back to the app:
      *
      * <intent-filter>

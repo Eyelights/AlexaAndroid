@@ -129,7 +129,7 @@ public class VoiceHelper{
     public void getSpeechFromText(String text, SpeechFromTextCallback callback){
 
         //create a new unique ID
-        String utteranceId = AuthorizationManagerImpl.createCodeVerifier();
+        String utteranceId = AuthorizationManager.createCodeVerifier();
 
         //add the callback to our list of callbacks
         mCallbacks.put(utteranceId, callback);

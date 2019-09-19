@@ -8,6 +8,7 @@ package com.willblaschko.android.alexa;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -33,6 +34,7 @@ import com.willblaschko.android.alexa.utility.Util;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.util.concurrent.RejectedExecutionException;
 
 import io.reactivex.Single;
 import io.reactivex.SingleEmitter;
@@ -41,7 +43,9 @@ import okhttp3.Call;
 import okhttp3.Response;
 import okio.BufferedSink;
 
+import static com.willblaschko.android.alexa.AuthorizationManager.createCodeVerifier;
 import static com.willblaschko.android.alexa.interfaces.response.ResponseParser.getBoundary;
+import static com.willblaschko.android.alexa.utility.Util.IDENTIFIER;
 
 /**
  * The overarching instance that handles all the state when requesting intents to the Alexa Voice Service servers, it creates all the required instances and confirms that users are logged in
@@ -58,7 +62,7 @@ public class AlexaManager {
 
     private static AlexaManager mInstance;
     private static AndroidSystemHandler mAndroidSystemHandler;
-    private AuthorizationManagerImpl authorizationManager;
+    private AuthorizationManager mAuthorizationManager;
     private SpeechSendVoice mSpeechSendVoice;
     private SpeechSendText mSpeechSendText;
     private SpeechSendAudio mSpeechSendAudio;
@@ -73,10 +77,17 @@ public class AlexaManager {
         }
         urlEndpoint = Util.getPreferences(context).getString(KEY_URL_ENDPOINT, context.getString(R.string.alexa_api));
 
-        authorizationManager = new AuthorizationManagerImpl(mContext, productId);
+        mAuthorizationManager = new AuthorizationManager(mContext, productId);
         mAndroidSystemHandler = AndroidSystemHandler.getInstance(context);
         Intent stickyIntent = new Intent(context, DownChannelService.class);
         context.startService(stickyIntent);
+
+        if (!Util.getPreferences(mContext).contains(IDENTIFIER)) {
+            Util.getPreferences(mContext)
+                    .edit()
+                    .putString(IDENTIFIER, createCodeVerifier(30))
+                    .apply();
+        }
     }
 
     /**
@@ -106,8 +117,8 @@ public class AlexaManager {
         return mInstance;
     }
 
-    public AuthorizationManagerImpl getAuthorizationManager() {
-        return authorizationManager;
+    public AuthorizationManager getAuthorizationManager() {
+        return mAuthorizationManager;
     }
 
     public void setUrlEndpoint(String url) {
@@ -153,7 +164,7 @@ public class AlexaManager {
      * @param callback state callback
      */
     public void checkLoggedIn(@NonNull final AsyncCallback<Boolean, Throwable> callback) {
-        authorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
+        mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
             @Override
             public void start() { }
 
@@ -183,7 +194,7 @@ public class AlexaManager {
         return Single.create(new SingleOnSubscribe<Boolean>() {
             @Override
             public void subscribe(final SingleEmitter<Boolean> emitter) {
-                authorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
+                mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
                     @Override
                     public void start() { }
 
@@ -211,7 +222,7 @@ public class AlexaManager {
      */
     public void logIn(@Nullable final AuthorizationCallback callback) {
         //check if we're already logged in
-        authorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
+        mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
             @Override
             public void start() { }
 
@@ -224,7 +235,7 @@ public class AlexaManager {
                     }
                 } else {
                     //otherwise start the authorization process
-                    authorizationManager.authorizeUser(callback);
+                    mAuthorizationManager.authorizeUser(callback);
                 }
             }
 
@@ -236,8 +247,11 @@ public class AlexaManager {
             }
 
             @Override
-            public void complete() { }
+            public void complete() {
+
+            }
         });
+
     }
 
     /**
@@ -268,30 +282,51 @@ public class AlexaManager {
      * @param callback the state change callback
      */
     public void sendTextRequest(final String text, @Nullable final AsyncCallback<AvsResponse, Exception> callback) {
-        authorizationManager.getToken(mContext, new TokenManager.TokenCallback() {
+        //check if the user is already logged in
+        mAuthorizationManager.checkLoggedIn(mContext, new ImplCheckLoggedInCallback() {
             @Override
-            public void onSuccess(String sToken) {
-                if(sToken != null && !sToken.equals("")) { //User connected
-                    final String url = getEventsUrl();
-                    final String token = sToken;
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            try {
-                                getSpeechSendText().sendText(mContext, url, token, text, new AsyncEventHandler(AlexaManager.this, callback));
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                //bubble up the error
-                                if (callback != null) {
-                                    callback.failure(e);
-                                }
-                            }
-                        }
-                    };
-                    Thread thread = new Thread(runnable);
-                    thread.start();
+            public void success(Boolean result) {
+                if (result) {
+                    //if the user is logged in
 
-                } else { //User not connected
+                    //set our URL
+                    final String url = getEventsUrl();
+                    //do this off the main thread
+                    new AsyncTask<Void, Void, AvsResponse>() {
+                        @Override
+                        protected AvsResponse doInBackground(Void... params) {
+                            //get our access token
+                            TokenManager.getAccessToken(mAuthorizationManager.getAmazonAuthorizationManager(), mContext, new TokenManager.TokenCallback() {
+                                @Override
+                                public void onSuccess(String token) {
+
+                                    try {
+                                        getSpeechSendText().sendText(mContext, url, token, text, new AsyncEventHandler(AlexaManager.this, callback));
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        //bubble up the error
+                                        if (callback != null) {
+                                            callback.failure(e);
+                                        }
+                                    }
+                                }
+
+                                @Override
+                                public void onFailure(Throwable e) {
+
+                                }
+                            });
+                            return null;
+                        }
+
+
+                        @Override
+                        protected void onPostExecute(AvsResponse avsResponse) {
+                            super.onPostExecute(avsResponse);
+                        }
+                    }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                } else {
+                    //if the user is not logged in, log them in and then call the function again
                     logIn(new ImplAuthorizationCallback<AvsResponse>(callback) {
 
                         @Override
@@ -299,12 +334,11 @@ public class AlexaManager {
                             //call our function again
                             sendTextRequest(text, callback);
                         }
+
                     });
                 }
             }
 
-            @Override
-            public void onFailure(Throwable t) { t.printStackTrace(); }
         });
     }
 
@@ -331,32 +365,55 @@ public class AlexaManager {
      * @param callback    the state change callback
      */
     public void sendAudioRequest(final DataRequestBody requestBody, @Nullable final AsyncCallback<AvsResponse, Exception> callback) {
-        authorizationManager.getToken(mContext, new TokenManager.TokenCallback() {
+        //check if the user is already logged in
+        mAuthorizationManager.checkLoggedIn(mContext, new ImplCheckLoggedInCallback() {
+
             @Override
-            public void onSuccess(String sToken) {
-                if(sToken != null && !sToken.equals("")) { //User connected
+            public void success(Boolean result) {
+                if (result) {
+                    //if the user is logged in
+
+                    //set our URL
                     final String url = getEventsUrl();
-                    final String token = sToken;
-                    Runnable runnable = new Runnable() {
+                    //get our access token
+                    TokenManager.getAccessToken(mAuthorizationManager.getAmazonAuthorizationManager(), mContext, new TokenManager.TokenCallback() {
                         @Override
-                        public void run() {
+                        public void onSuccess(final String token) {
+                            //do this off the main thread
                             try {
-                                getSpeechSendAudio().sendAudio(url, token, requestBody, new AsyncEventHandler(AlexaManager.this, callback));
+                                Runnable runnable = new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        try {
+                                            getSpeechSendAudio().sendAudio(url, token, requestBody, new AsyncEventHandler(AlexaManager.this, callback));
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                            //bubble up the error
+                                            if (callback != null) {
+                                                callback.failure(e);
+                                            }
+                                        }
+                                    }
+                                };
+
+                                Thread thread = new Thread(runnable);
+                                thread.start();
+
+                            } catch (RejectedExecutionException e) {
+                                e.printStackTrace();
                             } catch (Exception e) {
                                 e.printStackTrace();
-                                //bubble up the error
-                                if (callback != null) {
-                                    callback.failure(e);
-                                }
                             }
                         }
-                    };
-                    Thread thread = new Thread(runnable);
-                    thread.start();
 
-                } else { //User not connected
+                        @Override
+                        public void onFailure(Throwable e) {
+                            e.printStackTrace();
+                        }
+                    });
+                } else {
+                    //if the user is not logged in, log them in and then call the function again
                     logIn(new ImplAuthorizationCallback<AvsResponse>(callback) {
-
                         @Override
                         public void onSuccess() {
                             //call our function again
@@ -366,19 +423,20 @@ public class AlexaManager {
                 }
             }
 
-            @Override
-            public void onFailure(Throwable t) { t.printStackTrace(); }
         });
     }
 
     public void cancelAudioRequest() {
-        authorizationManager.checkLoggedIn(mContext, new ImplCheckLoggedInCallback() {
+        //check if the user is already logged in
+        mAuthorizationManager.checkLoggedIn(mContext, new ImplCheckLoggedInCallback() {
             @Override
             public void success(Boolean result) {
-                if(result) {
+                if (result) {
+                    //if the user is logged in
                     getSpeechSendAudio().cancelRequest();
                 }
             }
+
         });
     }
 
@@ -479,24 +537,38 @@ public class AlexaManager {
      * @param callback
      */
     public void sendEvent(final String event, final AsyncCallback<AvsResponse, Exception> callback) {
-        authorizationManager.getToken(mContext, new TokenManager.TokenCallback() {
+        //check if the user is already logged in
+        mAuthorizationManager.checkLoggedIn(mContext, new ImplCheckLoggedInCallback() {
+
             @Override
-            public void onSuccess(String sToken) {
-                if(sToken != null && !sToken.equals("")) { //User connected
+            public void success(Boolean result) {
+                if (result) {
+                    //if the user is logged in
+
+                    //set our URL
                     final String url = getEventsUrl();
-                    final String token = sToken;
-
-                    Runnable runnable = new Runnable() {
+                    //get our access token
+                    TokenManager.getAccessToken(mAuthorizationManager.getAmazonAuthorizationManager(), mContext, new TokenManager.TokenCallback() {
                         @Override
-                        public void run() {
-                            Log.i(TAG, event);
-                            new GenericSendEvent(url, token, event, new AsyncEventHandler(AlexaManager.this, callback));
+                        public void onSuccess(final String token) {
+                            Runnable runnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    Log.i(TAG, event);
+                                    new GenericSendEvent(url, token, event, new AsyncEventHandler(AlexaManager.this, callback));
+                                }
+                            };
+                            Thread thread = new Thread(runnable);
+                            thread.start();
                         }
-                    };
-                    Thread thread = new Thread(runnable);
-                    thread.start();
 
-                } /*else { //User not connected
+                        @Override
+                        public void onFailure(Throwable e) {
+
+                        }
+                    });
+                } else {
+                    //if the user is not logged in, log them in and then call the function again
                     logIn(new ImplAuthorizationCallback<AvsResponse>(callback) {
                         @Override
                         public void onSuccess() {
@@ -504,11 +576,9 @@ public class AlexaManager {
                             sendEvent(event, callback);
                         }
                     });
-                }*/
+                }
             }
 
-            @Override
-            public void onFailure(Throwable e) { e.printStackTrace(); }
         });
     }
 
@@ -637,13 +707,19 @@ public class AlexaManager {
     private abstract static class ImplCheckLoggedInCallback implements AsyncCallback<Boolean, Throwable> {
 
         @Override
-        public void start() { }
+        public void start() {
+
+        }
 
 
         @Override
-        public void failure(Throwable error) { }
+        public void failure(Throwable error) {
+
+        }
 
         @Override
-        public void complete() { }
+        public void complete() {
+
+        }
     }
 }

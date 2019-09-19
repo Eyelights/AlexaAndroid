@@ -254,6 +254,13 @@ public class AlexaManager {
 
     }
 
+    /**
+     * "Disconnect" the user from Alexa services
+     */
+    public void logOut() {
+        TokenManager.removeTokens(mContext);
+    }
+
 
     /**
      * Send a synchronize state {@link Event} request to Alexa Servers to retrieve pending {@link com.willblaschko.android.alexa.data.Directive}

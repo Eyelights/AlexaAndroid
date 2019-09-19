@@ -229,6 +229,20 @@ public class TokenManager {
         preferences.commit();
     }
 
+    /**
+     * Remove every traces of the current connection to make the application believe the user is disconnected
+     * /!\ Alexa services believe you are still connected !
+     * @param context {Context} : local/application context
+     */
+    public static void removeTokens(Context context) {
+        SharedPreferences.Editor preferences = Util.getPreferences(context.getApplicationContext()).edit();
+        preferences.remove(PREF_ACCESS_TOKEN);
+        preferences.remove(PREF_REFRESH_TOKEN);
+        preferences.remove(PREF_TOKEN_EXPIRES);
+        preferences.remove(AuthorizationManager.CODE_VERIFIER);
+        preferences.apply();
+    }
+
     public interface TokenResponseCallback {
         void onSuccess(TokenResponse response);
         void onFailure(Exception error);

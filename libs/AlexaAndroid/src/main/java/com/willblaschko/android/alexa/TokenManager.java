@@ -53,7 +53,7 @@ public class TokenManager {
      * @param context local/application level context
      * @param authCode the authorization code supplied by the Authorization Manager
      * @param codeVerifier a randomly generated verifier, must be the same every time
-     * @param authorizationManager the AuthorizationManager class calling this function
+     * @param authorizationManager the AmazonAuthorizationManager class calling this function
      * @param callback the callback for state changes
      */
     public static void getAccessToken(final Context context, @NonNull String authCode, @NonNull String codeVerifier, AmazonAuthorizationManager authorizationManager, @Nullable final TokenResponseCallback callback){

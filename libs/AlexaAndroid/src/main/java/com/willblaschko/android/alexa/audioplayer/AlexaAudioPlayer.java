@@ -96,7 +96,7 @@ public class AlexaAudioPlayer {
      *
      * @return Android native MediaPlayer
      */
-    private MediaPlayer getMediaPlayer() {
+    public MediaPlayer getMediaPlayer() {
         if (mMediaPlayer == null) {
             mMediaPlayer = new MediaPlayer();
             mMediaPlayer.setWakeMode(mContext, PowerManager.PARTIAL_WAKE_LOCK);

@@ -159,33 +159,6 @@ public class AlexaManager {
     }
 
     /**
-     * Check if the user is logged in to the Amazon service, uses an async callback with a boolean to return response
-     *
-     * @param callback state callback
-     */
-    public void checkLoggedIn(@NonNull final AsyncCallback<Boolean, Throwable> callback) {
-        mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
-            @Override
-            public void start() { }
-
-            @Override
-            public void success(Boolean result) {
-                callback.success(result);
-            }
-
-            @Override
-            public void failure(Throwable error) {
-                callback.failure(error);
-            }
-
-            @Override
-            public void complete() {
-
-            }
-        });
-    }
-
-    /**
      * Check if the user is logged into The Amazon service
      *
      * @return [Single<Boolean>] : true if the user is logged; false otherwise
@@ -195,21 +168,14 @@ public class AlexaManager {
             @Override
             public void subscribe(final SingleEmitter<Boolean> emitter) {
                 mAuthorizationManager.checkLoggedIn(mContext, new AsyncCallback<Boolean, Throwable>() {
-                    @Override
-                    public void start() { }
-
-                    @Override
-                    public void success(Boolean result) {
+                    @Override public void start() { }
+                    @Override public void success(Boolean result) {
                         emitter.onSuccess(result);
                     }
-
-                    @Override
-                    public void failure(Throwable error) {
+                    @Override public void failure(Throwable error) {
                         emitter.onError(error);
                     }
-
-                    @Override
-                    public void complete() { }
+                    @Override public void complete() { }
                 });
             }
         });
